@@ -5,8 +5,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.service import Service
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementNotInteractableException
 from tqdm import tqdm_notebook as tqdmn
@@ -22,11 +20,8 @@ from selenium import webdriver
 
 options = webdriver.ChromeOptions()
 options.add_argument("--headless=new")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
 
-
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)  # options=options)
+driver = webdriver.Chrome(options=options)  # options=options)
 wait = WebDriverWait(driver, timeout=6)
 
 
