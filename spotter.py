@@ -24,6 +24,7 @@ options.add_argument("--headless=new")
 driver = webdriver.Chrome(options=options)  # options=options)
 wait = WebDriverWait(driver, timeout=6)
 
+
 def distance(lat1, lon1, lat2, lon2):
     # Radius of the Earth in kilometers
     earth_radius_km = 6371.0
@@ -48,6 +49,8 @@ def distance(lat1, lon1, lat2, lon2):
 
 # input_list is list of score each location got.
 # rank the locations based on that score in descending order.
+
+
 def generate_rank(input_list):
     l = len(input_list)
     newl = input_list.copy()
@@ -55,13 +58,14 @@ def generate_rank(input_list):
     rank = [newl.index(i)+1 for i in input_list]
     return rank
 
+
 def find_similar_business(typ, city='', lato='', lono='', count=10):
     if city != '':
         city = '+in+'+city
 
     if lato == '' or lono == '':
         url = 'https://www.google.com/maps/search/' + typ + city
-        
+
     else:
         url = 'https://www.google.com/maps/search/' + \
             typ + city + '/@' + lato + ',' + lono
@@ -93,11 +97,14 @@ def find_similar_business(typ, city='', lato='', lono='', count=10):
         lon = lon.split('!')[0]
         simbus[name] = [lat, lon, link]
 
+    
+    #print(simbus)
+
     for j in simbus:
         try:
             driver.get(simbus[j][2])
-
-            # print(j)
+            #time.sleep(3)
+            print(j)
 
             # print(simbus[j][0],simbus[j][1])
 
@@ -117,6 +124,7 @@ def find_similar_business(typ, city='', lato='', lono='', count=10):
             simbus[j].append(rating)
             simbus[j].append(votes)
             print(j, simbus[j])
+            
 
         except Exception as e:
             if 'http' in simbus[j][2] and len(simbus) == 3:
@@ -141,7 +149,7 @@ locations = [{'lat': 12.063, 'lng': 76.731}, {
     'lat': 18.932, 'lng': 81.897}]
 
 
-def spotter(typ, city, locations, count=20):
+def spotter(typ, city, locations, count=5):
     lato = 0
     lono = 0
 
@@ -163,12 +171,12 @@ def spotter(typ, city, locations, count=20):
 
     # get the similar businesses in the area
     similar_businesses = find_similar_business(
-        typ=typ, 
-        city=city, 
-        lato=str(lato), 
-        lono=str(lono), 
+        typ=typ,
+        city=city,
+        lato=str(lato),
+        lono=str(lono),
         count=count
-        )
+    )
 
     # Iterate through each dictionary in the locations list
     for coord in locations:
@@ -201,7 +209,4 @@ def spotter(typ, city, locations, count=20):
 # print(spotter(typ='Restaurant', city='Koduvally', locations=locations))
 
 
-print(spotter(typ='Restaurant', city='Kochi', locations=locations, count=5))
-
-
-
+# print(spotter(typ='Restaurant', city='Kochi', locations=locations, count=5))
