@@ -26,6 +26,7 @@ def add_locations():
     # fetch the details of business from user
     details = locations[-1]
 
+
     rank, similar_businesses = spotter.spotter(
         typ=details['ctype'], city=details['cloc'], locations=locations[:-1])
     print(rank)
