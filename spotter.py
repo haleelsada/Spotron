@@ -15,13 +15,16 @@ import time
 import re
 import math
 
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 from selenium import webdriver
 
 options = webdriver.ChromeOptions()
 options.add_argument("--headless=new")
 
-driver = webdriver.Chrome(options=options)  # options=options)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))  # options=options)
 wait = WebDriverWait(driver, timeout=6)
 
 
