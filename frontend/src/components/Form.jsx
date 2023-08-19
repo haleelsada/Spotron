@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Navbar from './Navbar';
+import {  useNavigate } from 'react-router-dom';
 
 export default function Form() {
   // Create state variables to store form input values
@@ -8,7 +9,7 @@ export default function Form() {
   const [cloc, setCloc] = useState('');
   const [target, setTarget] = useState('');
   const [scale, setScale] = useState('small'); // Default value
-
+const navigate=useNavigate();
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,6 +21,7 @@ export default function Form() {
     localStorage.setItem('Company_location', cloc);
     localStorage.setItem('Company_target', target);
     localStorage.setItem('Company_scale', scale);
+    navigate('/map');
   };
 
   return (

@@ -6,6 +6,8 @@ import Error  from "./components/Error";
 import Features from "./components/Features";
 import Footer from "./components/Footer";
 import Form from "./components/Form";
+import Map from "./components/Map";
+
 
 
 const AppLayout = () =>{
@@ -25,12 +27,16 @@ const appRouter = createBrowserRouter([
     path:"/form",
     element:<Form/>
   },
+  {
+    path:"/map",
+    element:<Map/>
+},
     {
         path:"/",
         element:<AppLayout/>,
         errorElement:<Error/>,
     },
-  
+ 
   
 ])
 
