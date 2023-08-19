@@ -204,13 +204,4 @@ def spotter(typ, city, locations, count=20):
 print(spotter(typ='Restaurant', city='Kochi', locations=locations, count=5))
 
 
-app = Flask(__name__)
 
-
-@app.route('/')
-def landing_page():
-    return 'landing'
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
