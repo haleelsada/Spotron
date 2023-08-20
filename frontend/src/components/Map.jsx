@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 import L from 'leaflet'; // Import Leaflet library
-import axios from 'axios'; // You'll need to install axios for API requests
 import './Map.css'
 
 function Map() {
@@ -66,15 +65,49 @@ function Map() {
 
   const onSubmitButtonClick = async () => {
     try {
-      const response = await axios.post('/api/add_locations', {
-        locations: selectedLocations,
+      console.log("clicked")
+      setSelectedLocations(...selectedLocations,details)
+      const response = await fetch('/api/add_locations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ locations: selectedLocations }),
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Response:', data);
+        addresultmarker(data);
+        resetMap();
+      } else {
+        console.error('Failed to submit locations:', response.statusText);
+      }
       // Process response and update UI
     } catch (error) {
       console.error('Error sending data to Flask:', error);
     }
   };
 
+  function addresultmarker(response) {
+    finallocations = response['locations'];
+    rank = response['rank'];
+
+    for (let i = 0; i < finallocations.length; i++) {
+        let marker = L.marker([finallocations[i]['lat'],finallocations[i]['lng']]).addTo(map);
+        var j = rank[i];
+        var i_ = i+1;
+        var label = "Location <b>"+ i_ +"</b> <br> Ranked: <b>"+j+"</b>";
+        marker.bindTooltip( label, {
+            permanent: true, direction: 'right', 
+            offset: [3, -3], className: "my-labels"
+        });
+    }
+    var locationsListDiv = document.getElementById('locationsList');
+    locationsListDiv.innerHTML = '<h3>Result</h3><p>As shown in the map the locations are sorted based on different factors. The location with Rank <b>1</b> is the best location among the choices you have shown, then Rank <b>2</b> and go on..</p>';
+
+}
+    
   const resetMap = () => {
     markers.forEach((marker) => map.removeLayer(marker));
     setMarkers([]);
@@ -82,9 +115,12 @@ function Map() {
   };
 
   return (
+    
     <div className="flex">
-      <div id="map" className="h-screen w-screen"></div>
-      <div className="w-72 h-screen p-4 bg-gray-100">
+      <div id="map" className=" w-screen"></div>
+    <div class="container">
+
+      <div className="w-72 h-screen p-4 bg-gray">
         <div className="mb-4">
           <button
             className="button"
@@ -93,11 +129,11 @@ function Map() {
           >
             Submit
           </button>
-          <button className="button" onClick={resetMap}>
+          <button className="button " onClick={resetMap}>
             Reset
           </button>
         </div>
-        <div id="locationsList">
+        <div id="locationsList" className='mx-4'>
   <h2 className="text-xl font-semibold mb-2">Selected Locations</h2>
   {selectedLocations.map((location, index) => (
     <div key={index} className="border-b pb-2 mb-2">
@@ -116,8 +152,9 @@ function Map() {
       </button>
     </div>
   ))}
-</div>
 
+</div>
+      </div>
       </div>
     </div>
   );
