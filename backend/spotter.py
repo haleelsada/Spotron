@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_cors import CORS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,9 +16,10 @@ import time
 import re
 import math
 
-
 from selenium import webdriver
 
+app = Flask(__name__)
+CORS(app)
 options = webdriver.ChromeOptions()
 options.add_argument("--headless=new")
 
