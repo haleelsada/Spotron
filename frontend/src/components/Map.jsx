@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./Map.css";
-
+import Loader from "./Loader";
 function Map() {
   const [map, setMap] = useState(null);
   const [resultInfoVisible, setResultInfoVisible] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [resultMarkers, setResultMarkers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [details, setDetails] = useState({
     cname: localStorage.getItem("company_name"),
     ctype: localStorage.getItem("Company_Type"),
@@ -70,7 +72,7 @@ function Map() {
     try {
       const apiUrl = "http://localhost:5000";
       console.log("clicked");
-
+      setLoading(true);
       const response = await fetch(`${apiUrl}/api/add_locations`, {
         method: "POST",
         headers: {
@@ -78,6 +80,7 @@ function Map() {
         },
         body: JSON.stringify({ locations: [...selectedLocations, details] }),
       });
+      setLoading(false);
 
       if (response.ok) {
         const data = await response.json();
@@ -90,6 +93,7 @@ function Map() {
       }
     } catch (error) {
       console.error("Error sending data to Flask:", error);
+      setLoading(false);
     }
   };
 
@@ -154,6 +158,7 @@ function Map() {
   };
 
   return (
+    
     <div className="flex">
       <div id="map" className="w-screen"></div>
       <div className="container">
@@ -202,6 +207,9 @@ function Map() {
           </p>
         </div>
       )}
+      {loading && (
+      <Loader/>
+    )}
     </div>
   );
 }

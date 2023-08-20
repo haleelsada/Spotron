@@ -4,7 +4,6 @@ import Hero from "../src/components/Hero"
 import "./App.css"
 import Error  from "./components/Error";
 import Features from "./components/Features";
-import Footer from "./components/Footer";
 import Form from "./components/Form";
 import Map from "./components/Map";
 
@@ -15,7 +14,7 @@ const AppLayout = () =>{
         <>
         <Hero/>
         <Features/>
-        <Footer/>
+        
           
         </>
     )
