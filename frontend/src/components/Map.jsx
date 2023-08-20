@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
-import L from 'leaflet'; // Import Leaflet library
-import './Map.css'
+import React, { useState, useEffect } from "react";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import "./Map.css";
 
 function Map() {
   const [map, setMap] = useState(null);
+  const [resultInfoVisible, setResultInfoVisible] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [markers, setMarkers] = useState([]);
+  const [resultMarkers, setResultMarkers] = useState([]);
   const [details, setDetails] = useState({
-    cname: localStorage.getItem('company_name'),
-    ctype: localStorage.getItem('Company_Type'),
-    cloc: localStorage.getItem('Company_location'),
-    ctar: localStorage.getItem('Company_target'),
+    cname: localStorage.getItem("company_name"),
+    ctype: localStorage.getItem("Company_Type"),
+    cloc: localStorage.getItem("Company_location"),
+    ctar: localStorage.getItem("Company_target"),
   });
+  const [showBestSolutionPopup, setShowBestSolutionPopup] = useState(false);
 
   useEffect(() => {
-    // Initialize map
-    const newMap = L.map('map').setView([15, 77], 6);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const newMap = L.map("map").setView([15, 77], 6);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution:
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -26,19 +28,17 @@ function Map() {
   }, []);
 
   useEffect(() => {
-    // Attach click event to map
     if (map) {
-      map.on('click', onMapClick);
+      map.on("click", onMapClick);
     }
   }, [map]);
 
   const onMapClick = (e) => {
-    // Handle map click event
     const clickedLat = e.latlng.lat;
     const clickedLng = e.latlng.lng;
 
     const stepIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/3082/3082383.png',
+      iconUrl: "https://cdn-icons-png.flaticon.com/512/3082/3082383.png",
       iconSize: [30, 30],
     });
 
@@ -48,7 +48,10 @@ function Map() {
     setMarkers((prevMarkers) => [...prevMarkers, marker]);
 
     const locationDetails = { lat: clickedLat, lng: clickedLng };
-    setSelectedLocations((prevLocations) => [...prevLocations, locationDetails]);
+    setSelectedLocations((prevLocations) => [
+      ...prevLocations,
+      locationDetails,
+    ]);
   };
 
   const deleteLocation = (index) => {
@@ -65,97 +68,140 @@ function Map() {
 
   const onSubmitButtonClick = async () => {
     try {
-      console.log("clicked")
-      setSelectedLocations(...selectedLocations,details)
-      const response = await fetch('/api/add_locations', {
-        method: 'POST',
+      const apiUrl = "http://localhost:5000";
+      console.log("clicked");
+
+      const response = await fetch(`${apiUrl}/api/add_locations`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ locations: selectedLocations }),
+        body: JSON.stringify({ locations: [...selectedLocations, details] }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Response:', data);
+        console.log("Response:", data);
         addresultmarker(data);
-        resetMap();
+        BlaaMap();
+        setShowBestSolutionPopup(true);
       } else {
-        console.error('Failed to submit locations:', response.statusText);
+        console.error("Failed to submit locations:", response.statusText);
       }
-      // Process response and update UI
     } catch (error) {
-      console.error('Error sending data to Flask:', error);
+      console.error("Error sending data to Flask:", error);
     }
   };
 
-  function addresultmarker(response) {
-    finallocations = response['locations'];
-    rank = response['rank'];
+  useEffect(() => {
+    if (map && resultMarkers.length > 0) {
+      // Clear previous result markers and set the new ones
+      resultMarkers.forEach((marker) => marker.addTo(map));
 
-    for (let i = 0; i < finallocations.length; i++) {
-        let marker = L.marker([finallocations[i]['lat'],finallocations[i]['lng']]).addTo(map);
-        var j = rank[i];
-        var i_ = i+1;
-        var label = "Location <b>"+ i_ +"</b> <br> Ranked: <b>"+j+"</b>";
-        marker.bindTooltip( label, {
-            permanent: true, direction: 'right', 
-            offset: [3, -3], className: "my-labels"
-        });
+      return () => {
+        // Clean up by removing result markers when component unmounts
+        resultMarkers.forEach((marker) => map.removeLayer(marker));
+      };
     }
-    var locationsListDiv = document.getElementById('locationsList');
-    locationsListDiv.innerHTML = '<h3>Result</h3><p>As shown in the map the locations are sorted based on different factors. The location with Rank <b>1</b> is the best location among the choices you have shown, then Rank <b>2</b> and go on..</p>';
+  }, [map, resultMarkers]);
 
-}
-    
-  const resetMap = () => {
+  const addresultmarker = (response) => {
+    const finallocations = response["locations"];
+    const rank = response["rank"];
+
+    const newResultMarkers = finallocations.map((location, i) => {
+      const marker = L.marker([location["lat"], location["lng"]]);
+
+      const j = rank[i];
+      const i_ = i + 1;
+      const label = `Location ${i_} <br> Ranked: ${j}`;
+
+      marker.bindTooltip(label, {
+        permanent: true,
+        direction: "right",
+        offset: [3, -3],
+        className: "my-labels",
+      });
+
+      return marker;
+    });
+
+    // Set result markers using setResultMarkers
+    setResultMarkers(newResultMarkers);
+   // setResultInfoVisible(true);
+  };
+
+
+  const BlaaMap = () => {
     markers.forEach((marker) => map.removeLayer(marker));
     setMarkers([]);
     setSelectedLocations([]);
   };
 
+  const resetMap = () => {
+    markers.forEach((marker) => map.removeLayer(marker));
+    setMarkers([]);
+    setResultMarkers([]);
+    setSelectedLocations([]);
+  };
+ 
+  
+
+  const handleBestSolutionClick = () => {
+
+    setShowBestSolutionPopup(false);
+    window.location.reload();
+  };
+
   return (
-    
     <div className="flex">
-      <div id="map" className=" w-screen"></div>
-    <div class="container">
-
-      <div className="w-72 h-screen p-4 bg-gray">
-        <div className="mb-4">
-          <button
-            className="button"
-            onClick={onSubmitButtonClick}
-            disabled={selectedLocations.length === 0}
-          >
-            Submit
-          </button>
-          <button className="button " onClick={resetMap}>
-            Reset
-          </button>
+      <div id="map" className="w-screen"></div>
+      <div className="container">
+        <div className="w-72 h-screen p-4 bg-gray">
+          <div className="mb-4">
+            <button
+              className="button"
+              onClick={onSubmitButtonClick}
+              disabled={selectedLocations.length === 0}
+            >
+              Submit
+            </button>
+            <button className="button " onClick={resetMap}>
+              Reset
+            </button>
+          </div>
+          <div id="locationsList" className="mx-4">
+            <h2 className="text-xl font-semibold mb-2">Selected Locations</h2>
+            {selectedLocations.map((location, index) => (
+              <div key={index} className="border-b pb-2 mb-2">
+                <p className="text-sm">
+                  <span className="font-semibold">Location {index + 1}:</span>
+                  <br />
+                  Latitude: {location.lat}
+                  <br />
+                  Longitude: {location.lng}
+                </p>
+                <button
+                  className="button mt-2"
+                  onClick={() => deleteLocation(index)}
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <div id="locationsList" className='mx-4'>
-  <h2 className="text-xl font-semibold mb-2">Selected Locations</h2>
-  {selectedLocations.map((location, index) => (
-    <div key={index} className="border-b pb-2 mb-2">
-      <p className="text-sm">
-        <span className="font-semibold">Location {index + 1}:</span>
-        <br />
-        Latitude: {location.lat}
-        <br />
-        Longitude: {location.lng}
-      </p>
-      <button
-        className="button mt-2"
-        onClick={() => deleteLocation(index)}
-      >
-        Delete
-      </button>
-    </div>
-  ))}
-
-</div>
       </div>
-      </div>
+      {resultInfoVisible && (
+        <div id="locationsList" className="mx-4">
+          <h3>Result</h3>
+          <p>
+            As shown on the map, the locations are sorted based on different
+            factors. The location with Rank <b>1</b> is the best location among
+            the choices you have shown, then Rank <b>2</b> and so on...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

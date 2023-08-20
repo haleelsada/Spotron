@@ -162,11 +162,11 @@ def find_similar_business(typ, city='', lato='', lono='', count=10):
 
 
 
-business_type = 'restaurant'
-city = 'koduvally'
-lato = '11.357237'
-lono = '75.911491'
-scale = '15'    # add at the end of url after comma
+# business_type = 'restaurant'
+# city = 'koduvally'
+# lato = '11.357237'
+# lono = '75.911491'
+# scale = '15'    # add at the end of url after comma
 
 
 

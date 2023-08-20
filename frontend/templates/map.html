@@ -90,12 +90,6 @@
         animation: fadeOut 10s ease-in-out; 
     }
 
-    .button-container {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    align-items: center;
-}
     /* CSS animation keyframes for fading out */
     @keyframes fadeOut {
         from {
@@ -109,20 +103,16 @@
 </head>
 <body>
 
-    
     <div id="map"></div>
-    
     <div class="container">
-        <div class="button-container">
-            <button id="submit" class="button" onclick="onSubmitButtonClick()" disabled>Submit</button>
-            <button class="button" id="tryagainbutton" onclick="resetMap()">Reset</button>
-          </div>
+      <button class="button" id="newLocationButton">New Location</button>
+      <button class="button" id="tryagainbutton" onclick="window.location.replace('http://127.0.0.1:5000/map')" style="width: 120px;">Try again</button>
       <div id="locationsList">
         <div id="notification">
-            <p style="font-size: 20px;">Please go to your preferred city and mark the locations on the map. Then click <b>Submit</b> and wait for the results.</p>
+            <p style="font-size: 20px;">Please go to your prefered city and mark the locations with the help of <b>new location</b> button you have. Then click <b>submit</b> and wait</p>
         </div>
       </div>
-     
+      <button id="submit" class="button" onclick="onSubmitButtonClick()">submit</button>
     </div>
 
     <script>
@@ -160,38 +150,35 @@
         function onMapClick(e) {
             var clickedLat = e.latlng.lat;
             var clickedLng = e.latlng.lng;
-
+            
             // Create a marker at the clicked location
             var stepIcon = L.icon({
                 iconUrl: 'https://cdn-icons-png.flaticon.com/512/3082/3082383.png', // the background image you want
                 iconSize: [30, 30] // size of the icon
             });
 
-            var marker = L.marker([clickedLat, clickedLng], { icon: stepIcon });
+            var marker = L.marker([clickedLat, clickedLng], { icon:stepIcon});
 
             marker.addTo(map);
+            
+
 
             markers.push(marker); // Store the marker reference
-
+            
             // Store the location details in the selectedLocations array
             var locationDetails = {
                 lat: clickedLat,
                 lng: clickedLng,
-                // Add any other relevant information about the location here
+                    // Add any other relevant information about the location here
             };
             selectedLocations.push(locationDetails);
 
-            // Display the selected locations on the side of the map
-            updateLocationsList();
-        }
+                // Display the selected locations on the side of the map
+                updateLocationsList();
 
-        // Function to reset the map and remove markers
-        function resetMap() {
-            deleteAllMarkers();
-            var submitButton = document.getElementById("submit");
-            submitButton.disabled = true;
+                // Disable the map click event after a location is selected
+                map.off('click', onMapClick);
         }
-        map.on('click', onMapClick);
 
         // Function to update the list of selected locations on the side of the map
         function updateLocationsList() {

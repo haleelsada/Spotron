@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import spotter
+from flask_cors import CORS
 
-
-app = Flask(_name_)
-
+app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/')
@@ -39,9 +39,11 @@ def add_locations():
     print(rank)
     response_data = {'rank': rank,
                      'locations': locations[:-1], 'details': details}
+    print(response_data)
+
     return jsonify(response_data)
 
 
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     app.run(debug=True)
